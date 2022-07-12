@@ -61,4 +61,4 @@ OK: Winmgmt Running.
 # Todo
 
 - Add better command line management
-- add more state status like "pending start"
+- Add more state status like "pending start"
