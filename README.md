@@ -63,3 +63,4 @@ OK: Winmgmt Running.
 - Add better command line management
 - Add more state status like "pending start"
 - review the code with claude
+- review the account
