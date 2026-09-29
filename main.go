@@ -33,7 +33,7 @@ var (
 			Argument:  "service",
 			Shorthand: "s",
 			Default:   "",
-			Usage:     "Expected service status",
+			Usage:     "Name of the Windows service to check",
 			Value:     &plugin.Service,
 		},
 	}
@@ -46,7 +46,7 @@ func main() {
 
 func checkArgs(event *corev2.Event) (int, error) {
 	if plugin.Service == "" {
-		return sensu.CheckStateWarning, errors.New("--service environment variable is required")
+		return sensu.CheckStateWarning, errors.New("--service flag or CHECK_SERVICE environment variable is required")
 	}
 	return sensu.CheckStateOK, nil
 }
@@ -67,12 +67,24 @@ func executeCheck(event *corev2.Event) (int, error) {
 		return sensu.CheckStateUnknown, fmt.Errorf("failed to query to service manager: %w", err)
 	}
 	switch statusCode.State {
-	case svc.Stopped:
-		fmt.Printf("CRITICAL: %s stopped", plugin.Service)
-		return sensu.CheckStateCritical, nil
 	case svc.Running:
-		fmt.Printf("OK: %s Running.", plugin.Service)
+		fmt.Printf("OK: %s running\n", plugin.Service)
 		return sensu.CheckStateOK, nil
+	case svc.Stopped:
+		fmt.Printf("CRITICAL: %s stopped\n", plugin.Service)
+		return sensu.CheckStateCritical, nil
+	case svc.StartPending, svc.StopPending, svc.ContinuePending, svc.PausePending, svc.Paused:
+		fmt.Printf("WARNING: %s %s\n", plugin.Service, stateNames[statusCode.State])
+		return sensu.CheckStateWarning, nil
 	}
+	fmt.Printf("UNKNOWN: %s in unexpected state %d\n", plugin.Service, statusCode.State)
 	return sensu.CheckStateUnknown, nil
+}
+
+var stateNames = map[svc.State]string{
+	svc.StartPending:    "start pending",
+	svc.StopPending:     "stop pending",
+	svc.ContinuePending: "continue pending",
+	svc.PausePending:    "pause pending",
+	svc.Paused:          "paused",
 }
