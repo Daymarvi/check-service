@@ -1,0 +1,34 @@
+version: 2
+
+project_name: check-service
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - "386"
+    # Sensu assets expect executables under bin/
+    binary: bin/{{ .ProjectName }}
+    ldflags:
+      - -s -w
+      - -X github.com/sensu/sensu-plugin-sdk/version.version={{ .Version }}
+      - -X github.com/sensu/sensu-plugin-sdk/version.commit={{ .Commit }}
+      - -X github.com/sensu/sensu-plugin-sdk/version.date={{ .Date }}
+
+archives:
+  - formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_sha512-checksums.txt"
+  algorithm: sha512
+
+changelog:
+  sort: asc
