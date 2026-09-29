@@ -77,6 +77,19 @@ CRITICAL: wuauserv stopped
 OK: Winmgmt running
 ```
 
+# Release
+
+Releases are built and published by GitHub Actions with [GoReleaser](https://goreleaser.com) when a version tag is pushed:
+
+```
+git checkout main
+git pull
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The release page then contains `check-service_<version>_windows_amd64.tar.gz` and `_windows_386.tar.gz` (with `bin/check-service.exe`, usable as a Sensu asset) and a sha512 checksums file.
+
 # Todo
 
 - Add better command line management
