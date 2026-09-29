@@ -2,7 +2,14 @@
 A small go program to check the Windows service state
 # Description
 
-Check Windows service status by using the syscall and return sensu.checkstate.
+Check Windows service status through the Windows service manager and return a Sensu check state.
+
+| Service state                                                       | Check state  |
+|---------------------------------------------------------------------|--------------|
+| Running                                                             | OK (0)       |
+| Start pending, stop pending, continue pending, pause pending, paused | WARNING (1)  |
+| Stopped                                                             | CRITICAL (2) |
+| Service not found or service manager unreachable                    | UNKNOWN (3)  |
 
 # Synopis
 
@@ -11,21 +18,33 @@ check-service.exe --service MyService
 check-service.exe --service "My Service"
 ```
 
+The service name can also be given through the `CHECK_SERVICE` environment variable.
+
 # Installation
+
+## Requirements
+
+- Go 1.26 or later
 
 ## Building from source 
 
 Clone the repository
 
 ```
-& git clone https://github.com/Daymarvi/sensu-go-service-check
-& cd sensu-go-service-check
+& git clone https://github.com/Daymarvi/check-service
+& cd check-service
 ```
 
-build it
+build it on Windows
 
 ```
 & go build
+```
+
+or cross-compile it from Linux/macOS
+
+```
+GOOS=windows GOARCH=amd64 go build -o check-service.exe
 ```
 
 ## Usage
@@ -42,11 +61,11 @@ Available Commands:
 
 Flags:
   -h, --help             help for check-service
-  -s, --service string   Expected service status
+  -s, --service string   Name of the Windows service to check
 
 Use "check-service [command] --help" for more information about a command.
 
-Error executing check-service: error validating input: --service environment variable is required
+Error executing check-service: error validating input: --service flag or CHECK_SERVICE environment variable is required
 
 .\check-service.exe --service fax
 CRITICAL: fax stopped
@@ -55,10 +74,9 @@ CRITICAL: fax stopped
 CRITICAL: wuauserv stopped
 
 .\check-service.exe --service  Winmgmt
-OK: Winmgmt Running.
+OK: Winmgmt running
 ```
 
 # Todo
 
 - Add better command line management
-- Add more state status like "pending start"
